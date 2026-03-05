@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>全体会視聴チェックリスト | オルテナジー</title>
+<style>
+  :root {
+    --primary: #1a5276;
+    --primary-light: #2980b9;
+    --primary-bg: #eaf2f8;
+    --accent: #27ae60;
+    --accent-light: #2ecc71;
+    --border: #d5dbdb;
+    --text: #2c3e50;
+    --text-light: #7f8c8d;
+    --bg: #f8f9fa;
+    --white: #ffffff;
+    --danger: #e74c3c;
+    --warning: #f39c12;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+  }
+
+  /* Header */
+  .header {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+    color: var(--white);
+    padding: 1.2rem 1.5rem;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  }
+
+  .header-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+  }
+
+  .company-name {
+    font-size: 0.85rem;
+    opacity: 0.85;
+    letter-spacing: 0.1em;
+  }
+
+  .header h1 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+  }
+
+  /* Month navigation */
+  .month-nav {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .month-nav button {
+    background: rgba(255,255,255,0.2);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: var(--white);
+    width: 36px;
+    height: 36px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+  }
+
+  .month-nav button:hover {
+    background: rgba(255,255,255,0.35);
+  }
+
+  .month-nav input[type="month"] {
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: var(--white);
+    padding: 0.4rem 0.6rem;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    cursor: pointer;
+    height: 36px;
+  }
+
+  .month-nav input[type="month"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+  }
+
+  /* Progress section */
+  .progress-section {
+    max-width: 1200px;
+    margin: 1.2rem auto;
+    padding: 0 1rem;
+  }
+
+  .progress-card {
+    background: var(--white);
+    border-radius: 10px;
+    padding: 1.2rem 1.5rem;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  }
+
+  .progress-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.8rem;
+  }
+
+  .progress-label {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--text);
+  }
+
+  .progress-count {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--primary);
+  }
+
+  .progress-count span {
+    font-size: 0.85rem;
+    color: var(--text-light);
+    font-weight: 400;
+  }
+
+  .progress-bar-outer {
+    width: 100%;
+    height: 12px;
+    background: #ecf0f1;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  .progress-bar-inner {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent-light));
+    border-radius: 6px;
+    transition: width 0.4s ease;
+    min-width: 0;
+  }
+
+  .progress-percent {
+    text-align: right;
+    font-size: 0.85rem;
+    color: var(--text-light);
+    margin-top: 0.3rem;
+  }
+
+  /* Main content */
+  .main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem 2rem;
+  }
+
+  /* Department card */
+  .dept-card {
+    background: var(--white);
+    border-radius: 10px;
+    margin-bottom: 1rem;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    overflow: hidden;
+  }
+
+  .dept-header {
+    background: var(--primary);
+    color: var(--white);
+    padding: 0.8rem 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .dept-header:hover {
+    filter: brightness(1.1);
+  }
+
+  .dept-header-left {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .dept-title {
+    font-size: 1.05rem;
+    font-weight: 600;
+  }
+
+  .dept-toggle {
+    font-size: 0.8rem;
+    transition: transform 0.3s;
+  }
+
+  .dept-header.collapsed .dept-toggle {
+    transform: rotate(-90deg);
+  }
+
+  .dept-progress {
+    font-size: 0.85rem;
+    opacity: 0.9;
+    white-space: nowrap;
+  }
+
+  .dept-body {
+    padding: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+  }
+
+  .dept-body.collapsed {
+    max-height: 0 !important;
+    padding: 0;
+  }
+
+  /* Group section */
+  .group-section {
+    padding: 0.5rem 0;
+  }
+
+  .group-name {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--primary-light);
+    padding: 0.4rem 1.2rem;
+    background: var(--primary-bg);
+    border-left: 3px solid var(--primary-light);
+    margin: 0 0.6rem;
+    border-radius: 0 4px 4px 0;
+  }
+
+  /* Member row */
+  .member-row {
+    display: flex;
+    align-items: center;
+    padding: 0.55rem 1.2rem;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background 0.15s;
+    gap: 0.6rem;
+  }
+
+  .member-row:hover {
+    background: #fafbfc;
+  }
+
+  .member-row:last-child {
+    border-bottom: none;
+  }
+
+  .member-row.checked {
+    background: #f0fdf4;
+  }
+
+  .member-checkbox {
+    flex-shrink: 0;
+  }
+
+  .member-checkbox input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    accent-color: var(--accent);
+  }
+
+  .member-info {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+  }
+
+  .member-name {
+    font-weight: 500;
+    font-size: 0.95rem;
+    white-space: nowrap;
+  }
+
+  .member-position {
+    font-size: 0.75rem;
+    color: var(--text-light);
+    background: #f0f0f0;
+    padding: 0.1rem 0.5rem;
+    border-radius: 10px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .member-note {
+    font-size: 0.75rem;
+    color: var(--warning);
+    background: #fef9e7;
+    padding: 0.1rem 0.5rem;
+    border-radius: 10px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .member-timestamp {
+    font-size: 0.75rem;
+    color: var(--text-light);
+    white-space: nowrap;
+    flex-shrink: 0;
+    min-width: 80px;
+    text-align: right;
+  }
+
+  /* Color variations for departments */
+  .dept-card:nth-child(10n+1) .dept-header { background: #1a5276; }
+  .dept-card:nth-child(10n+2) .dept-header { background: #1b4f72; }
+  .dept-card:nth-child(10n+3) .dept-header { background: #154360; }
+  .dept-card:nth-child(10n+4) .dept-header { background: #1a6e7e; }
+  .dept-card:nth-child(10n+5) .dept-header { background: #1a5276; }
+  .dept-card:nth-child(10n+6) .dept-header { background: #1b4f72; }
+  .dept-card:nth-child(10n+7) .dept-header { background: #154360; }
+  .dept-card:nth-child(10n+8) .dept-header { background: #1a6e7e; }
+  .dept-card:nth-child(10n+9) .dept-header { background: #1a5276; }
+  .dept-card:nth-child(10n+10) .dept-header { background: #1b4f72; }
+
+  /* Footer */
+  .footer {
+    text-align: center;
+    padding: 1.5rem;
+    color: var(--text-light);
+    font-size: 0.85rem;
+    border-top: 1px solid var(--border);
+    background: var(--white);
+    margin-top: 1rem;
+  }
+
+  .footer-note {
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 0.3rem;
+  }
+
+  /* Loading */
+  .loading {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-light);
+  }
+
+  .loading-spinner {
+    display: inline-block;
+    width: 32px;
+    height: 32px;
+    border: 3px solid #ecf0f1;
+    border-top-color: var(--primary-light);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-bottom: 0.5rem;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* Connection status */
+  .status-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.75rem;
+    opacity: 0.8;
+  }
+
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  .status-dot.offline {
+    background: var(--danger);
+  }
+
+  /* Mobile responsive */
+  @media (max-width: 640px) {
+    .header h1 {
+      font-size: 1.05rem;
+    }
+
+    .header-top {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .month-nav {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .member-row {
+      flex-wrap: wrap;
+      padding: 0.6rem 0.8rem;
+      gap: 0.3rem;
+    }
+
+    .member-info {
+      flex-wrap: wrap;
+    }
+
+    .member-timestamp {
+      width: 100%;
+      text-align: left;
+      padding-left: 26px;
+      min-width: unset;
+    }
+
+    .dept-header {
+      padding: 0.7rem 0.8rem;
+    }
+
+    .group-name {
+      margin: 0 0.4rem;
+      padding: 0.3rem 0.8rem;
+      font-size: 0.8rem;
+    }
+
+    .progress-card {
+      padding: 1rem;
+    }
+
+    .progress-count {
+      font-size: 1.2rem;
+    }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-inner">
+    <div class="header-top">
+      <div>
+        <div class="company-name">オルテナジー</div>
+        <h1>全体会視聴チェックリスト</h1>
+      </div>
+      <div style="display:flex; align-items:center; gap:1rem; flex-wrap:wrap;">
+        <div class="status-indicator">
+          <div class="status-dot" id="statusDot"></div>
+          <span id="statusText">接続中...</span>
+        </div>
+        <nav class="month-nav">
+          <button id="prevMonth" title="前月">&#9664;</button>
+          <input type="month" id="monthPicker">
+          <button id="nextMonth" title="翌月">&#9654;</button>
+        </nav>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section class="progress-section">
+  <div class="progress-card">
+    <div class="progress-header">
+      <span class="progress-label">全体進捗</span>
+      <span class="progress-count"><span id="checkedCount">0</span> / <span id="totalCount">0</span> <span>名</span></span>
+    </div>
+    <div class="progress-bar-outer">
+      <div class="progress-bar-inner" id="progressBar" style="width:0%"></div>
+    </div>
+    <div class="progress-percent" id="progressPercent">0%</div>
+  </div>
+</section>
+
+<main class="main" id="orgContainer">
+  <div class="loading">
+    <div class="loading-spinner"></div>
+    <div>読み込み中...</div>
+  </div>
+</main>
+
+<footer class="footer">
+  <div class="footer-note">当日参加 / YouTube閲覧</div>
+  <div>&copy; オルテナジー 全体会視聴チェックリスト</div>
+</footer>
+
+<!-- Firebase v9 compat CDN -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<script>
+// ============================================================
+// Firebase Configuration (placeholder - update with real values)
+// ============================================================
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+// ============================================================
+// Organization Data
+// ============================================================
+const orgData = [
+  {
+    department: "技術部",
+    groups: [
+      {
+        name: "O&Mグループ",
+        members: [
+          { position: "部長", name: "黒田 浩明" },
+          { position: "GL", name: "田野 勇人" },
+          { position: "一般", name: "廣木 憲文" },
+          { position: "一般", name: "太田 賢宏" },
+          { position: "一般", name: "山﨑 魁人" },
+          { position: "一般", name: "笹沼 和宏" },
+          { position: "一般", name: "和埜 達斗" },
+          { position: "一般", name: "BOLD JIGJIDSUREN" },
+          { position: "業務委託", name: "淀川 大地" }
+        ]
+      },
+      {
+        name: "技術設計グループ",
+        members: [
+          { position: "GL", name: "田中 久也" },
+          { position: "一般", name: "田中 詩織" },
+          { position: "一般", name: "杉本 明実" },
+          { position: "一般", name: "工藤 基徳" },
+          { position: "一般", name: "山上 颯太" },
+          { position: "一般", name: "宮川 美咲" },
+          { position: "契約社員", name: "由井 晴代" },
+          { position: "派遣", name: "加藤 有子" },
+          { position: "派遣", name: "若松 珠礼" }
+        ]
+      }
+    ]
+  },
+  {
+    department: "施工管理部",
+    groups: [
+      {
+        name: null,
+        members: [
+          { position: "部長", name: "佐伯 悠帆" },
+          { position: "GL", name: "柏倉 宙" },
+          { position: "一般", name: "増田 啓佑" },
+          { position: "一般", name: "増田 尚弘" },
+          { position: "一般", name: "柳田 朋広" },
+          { position: "一般", name: "白須 浩章" }
+        ]
+      }
+    ]
+  },
+  {
+    department: "営業部",
+    groups: [
+      {
+        name: "営業第一グループ",
+        members: [
+          { position: "部長", name: "佐藤 誉世夫" },
+          { position: "GL", name: "高橋 努" },
+          { position: "一般", name: "前田 純平" },
+          { position: "一般", name: "五十嵐 茂紀" },
+          { position: "一般", name: "清 哲志" }
+        ]
+      },
+      {
+        name: "営業第二グループ",
+        members: [
+          { position: "GL", name: "西原 勝章" },
+          { position: "一般", name: "荒川さくら" }
+        ]
+      },
+      {
+        name: "営業第三グループ",
+        members: [
+          { position: "GL", name: "中村 優斗" },
+          { position: "一般", name: "大島 拓丈" },
+          { position: "一般", name: "山本 龍" }
+        ]
+      },
+      {
+        name: "営業支援グループ",
+        members: [
+          { position: "GL", name: "石井 理絵" },
+          { position: "一般", name: "菅沼 桃乃" },
+          { position: "一般", name: "加藤 琴実" },
+          { position: "一般", name: "長倉 玲美" },
+          { position: "一般", name: "山本 由希子" },
+          { position: "一般", name: "山村 恵" },
+          { position: "一般", name: "魚住 真美加" },
+          { position: "業務委託", name: "山重 奈美" },
+          { position: "パート", name: "渋谷 佳奈" }
+        ]
+      }
+    ]
+  },
+  {
+    department: "社長室",
+    groups: [
+      {
+        name: null,
+        members: [
+          { position: "室長", name: "深浦 正裕" },
+          { position: "CRO", name: "持田 雅博" }
+        ]
+      }
+    ]
+  },
+  {
+    department: "アセット管理部",
+    groups: [
+      {
+        name: "アセット管理グループ",
+        members: [
+          { position: "部長", name: "田中 圭亮" },
+          { position: "一般", name: "望月 敬史" },
+          { position: "業務委託", name: "田中 淳" }
+        ]
+      },
+      {
+        name: "O＆M管理グループ",
+        members: [
+          { position: "一般", name: "坪坂 聖子", note: "兼務" },
+          { position: "一般", name: "大澤 奈央子" },
+          { position: "一般", name: "田子 正一郎" }
+        ]
+      }
+    ]
+  },
+  {
+    department: "マーケティング部",
+    groups: [
+      {
+        name: null,
+        members: [
+          { position: "部長", name: "増田 欣宏" },
+          { position: "一般", name: "牛川 結巳香" }
+        ]
+      }
+    ]
+  },
+  {
+    department: "広報部",
+    groups: [
+      {
+        name: null,
+        members: [
+          { position: "部長", name: "井上 篤" },
+          { position: "一般", name: "佐藤 里彩" },
+          { position: "一般", name: "金子 友貴" }
+        ]
+      }
+    ]
+  },
+  {
+    department: "人事総務部",
+    groups: [
+      {
+        name: null,
+        members: [
+          { position: "部長", name: "大用 将士" },
+          { position: "一般", name: "太田 風美" },
+          { position: "一般", name: "髙橋 奈々子" },
+          { position: "一般", name: "筒井 梨佳子" },
+          { position: "パート", name: "菅 織" },
+          { position: "業務委託", name: "千葉 智子" }
+        ]
+      }
+    ]
+  },
+  {
+    department: "管理部",
+    groups: [
+      {
+        name: null,
+        members: [
+          { position: "部長", name: "大槻 幹彦" },
+          { position: "一般", name: "坪坂 聖子" },
+          { position: "一般", name: "唐 昱瑾" },
+          { position: "一般", name: "唐澤 一旗" }
+        ]
+      },
+      {
+        name: "調達グループ",
+        members: [
+          { position: "GL", name: "萩原 聡子" },
+          { position: "一般", name: "齊藤 佳子" },
+          { position: "一般", name: "黒澤 遥", note: "産休" },
+          { position: "パート", name: "牛込あずさ", note: "育休" }
+        ]
+      }
+    ]
+  },
+  {
+    department: "システム部",
+    groups: [
+      {
+        name: "システムグループ",
+        members: [
+          { position: "部長", name: "髙橋 眞剛" },
+          { position: "GL", name: "車 武松" },
+          { position: "一般", name: "大橋 矩美子" },
+          { position: "一般", name: "山口 聡子" },
+          { position: "一般", name: "nay nwewin" },
+          { position: "一般", name: "渡辺 大樹" },
+          { position: "一般", name: "信岡 由利亜" },
+          { position: "一般", name: "廣井 樹" },
+          { position: "業務委託", name: "鈴木 正浩" }
+        ]
+      }
+    ]
+  }
+];
+
+// ============================================================
+// State
+// ============================================================
+let currentMonth = '';
+let checkData = {};
+let unsubscribe = null;
+let allMembers = []; // flat list of all member names
+
+// Build flat member list
+orgData.forEach(dept => {
+  dept.groups.forEach(group => {
+    group.members.forEach(m => {
+      allMembers.push(m.name);
+    });
+  });
+});
+
+// ============================================================
+// Utility
+// ============================================================
+function getCurrentYearMonth() {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, '0');
+  return `${y}-${m}`;
+}
+
+function formatYearMonth(ym) {
+  const [y, m] = ym.split('-');
+  return `${y}年${parseInt(m)}月`;
+}
+
+function formatTimestamp(ts) {
+  if (!ts) return '';
+  const d = new Date(ts);
+  if (isNaN(d.getTime())) return '';
+  const mo = d.getMonth() + 1;
+  const da = d.getDate();
+  const h = String(d.getHours()).padStart(2, '0');
+  const mi = String(d.getMinutes()).padStart(2, '0');
+  return `${mo}/${da} ${h}:${mi}`;
+}
+
+function shiftMonth(ym, delta) {
+  const [y, m] = ym.split('-').map(Number);
+  const d = new Date(y, m - 1 + delta, 1);
+  const ny = d.getFullYear();
+  const nm = String(d.getMonth() + 1).padStart(2, '0');
+  return `${ny}-${nm}`;
+}
+
+// ============================================================
+// Firestore operations
+// ============================================================
+function subscribeToMonth(ym) {
+  // Unsubscribe from previous listener
+  if (unsubscribe) {
+    unsubscribe();
+    unsubscribe = null;
+  }
+
+  const docRef = db.collection('viewing_checks').doc(ym);
+
+  unsubscribe = docRef.onSnapshot(
+    (snapshot) => {
+      setStatus(true);
+      if (snapshot.exists) {
+        checkData = snapshot.data() || {};
+      } else {
+        checkData = {};
+      }
+      updateUI();
+    },
+    (error) => {
+      console.error('Firestore error:', error);
+      setStatus(false);
+    }
+  );
+}
+
+async function toggleCheck(name, checked) {
+  const docRef = db.collection('viewing_checks').doc(currentMonth);
+
+  try {
+    const updateData = {};
+    if (checked) {
+      updateData[name] = {
+        checked: true,
+        timestamp: new Date().toISOString()
+      };
+    } else {
+      updateData[name] = {
+        checked: false,
+        timestamp: ''
+      };
+    }
+
+    // Use set with merge to create doc if it doesn't exist
+    await docRef.set(updateData, { merge: true });
+  } catch (error) {
+    console.error('Error updating check:', error);
+    alert('更新に失敗しました。ページを再読み込みしてください。');
+  }
+}
+
+// ============================================================
+// Status indicator
+// ============================================================
+function setStatus(online) {
+  const dot = document.getElementById('statusDot');
+  const text = document.getElementById('statusText');
+  if (online) {
+    dot.classList.remove('offline');
+    text.textContent = 'リアルタイム同期中';
+  } else {
+    dot.classList.add('offline');
+    text.textContent = '接続エラー';
+  }
+}
+
+// ============================================================
+// Render
+// ============================================================
+function renderOrg() {
+  const container = document.getElementById('orgContainer');
+  container.innerHTML = '';
+
+  orgData.forEach((dept, deptIdx) => {
+    const card = document.createElement('div');
+    card.className = 'dept-card';
+
+    // Count department members
+    let deptTotal = 0;
+    let deptChecked = 0;
+    dept.groups.forEach(g => {
+      g.members.forEach(m => {
+        deptTotal++;
+        if (checkData[m.name] && checkData[m.name].checked) deptChecked++;
+      });
+    });
+
+    // Department header
+    const header = document.createElement('div');
+    header.className = 'dept-header';
+    header.innerHTML = `
+      <div class="dept-header-left">
+        <span class="dept-toggle">&#9660;</span>
+        <span class="dept-title">${dept.department}</span>
+      </div>
+      <span class="dept-progress">${deptChecked} / ${deptTotal}</span>
+    `;
+
+    header.addEventListener('click', () => {
+      header.classList.toggle('collapsed');
+      body.classList.toggle('collapsed');
+    });
+
+    card.appendChild(header);
+
+    // Department body
+    const body = document.createElement('div');
+    body.className = 'dept-body';
+
+    dept.groups.forEach((group) => {
+      const section = document.createElement('div');
+      section.className = 'group-section';
+
+      // Group name header (if it exists)
+      if (group.name) {
+        const gName = document.createElement('div');
+        gName.className = 'group-name';
+        gName.textContent = group.name;
+        section.appendChild(gName);
+      }
+
+      // Members
+      group.members.forEach(member => {
+        const isChecked = checkData[member.name] && checkData[member.name].checked;
+        const ts = checkData[member.name] && checkData[member.name].timestamp
+          ? checkData[member.name].timestamp : '';
+
+        const row = document.createElement('div');
+        row.className = 'member-row' + (isChecked ? ' checked' : '');
+        row.dataset.name = member.name;
+
+        row.innerHTML = `
+          <div class="member-checkbox">
+            <input type="checkbox" ${isChecked ? 'checked' : ''}
+              data-name="${member.name}"
+              title="${member.name}">
+          </div>
+          <div class="member-info">
+            <span class="member-name">${member.name}</span>
+            <span class="member-position">${member.position}</span>
+            ${member.note ? `<span class="member-note">${member.note}</span>` : ''}
+          </div>
+          <div class="member-timestamp">${formatTimestamp(ts)}</div>
+        `;
+
+        const cb = row.querySelector('input[type="checkbox"]');
+        cb.addEventListener('change', (e) => {
+          toggleCheck(member.name, e.target.checked);
+        });
+
+        section.appendChild(row);
+      });
+
+      body.appendChild(section);
+    });
+
+    card.appendChild(body);
+    container.appendChild(card);
+  });
+}
+
+function updateProgress() {
+  let total = allMembers.length;
+  let checked = 0;
+
+  allMembers.forEach(name => {
+    if (checkData[name] && checkData[name].checked) checked++;
+  });
+
+  document.getElementById('checkedCount').textContent = checked;
+  document.getElementById('totalCount').textContent = total;
+
+  const pct = total > 0 ? Math.round((checked / total) * 100) : 0;
+  document.getElementById('progressBar').style.width = pct + '%';
+  document.getElementById('progressPercent').textContent = pct + '%';
+}
+
+function updateUI() {
+  renderOrg();
+  updateProgress();
+}
+
+// ============================================================
+// Month navigation
+// ============================================================
+function setMonth(ym) {
+  currentMonth = ym;
+  document.getElementById('monthPicker').value = ym;
+  document.title = `${formatYearMonth(ym)} 全体会視聴チェックリスト | オルテナジー`;
+  subscribeToMonth(ym);
+}
+
+document.getElementById('monthPicker').addEventListener('change', (e) => {
+  setMonth(e.target.value);
+});
+
+document.getElementById('prevMonth').addEventListener('click', () => {
+  setMonth(shiftMonth(currentMonth, -1));
+});
+
+document.getElementById('nextMonth').addEventListener('click', () => {
+  setMonth(shiftMonth(currentMonth, 1));
+});
+
+// ============================================================
+// Initialize
+// ============================================================
+setMonth(getCurrentYearMonth());
+</script>
+
+</body>
+</html>
