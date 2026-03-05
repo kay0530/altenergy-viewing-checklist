@@ -270,19 +270,58 @@
     border-bottom: none;
   }
 
-  .member-row.checked {
+  .member-row.checked-realtime {
+    background: #eaf2f8;
+  }
+
+  .member-row.checked-youtube {
+    background: #fdedec;
+  }
+
+  .member-row.checked-both {
     background: #f0fdf4;
   }
 
-  .member-checkbox {
+  .view-buttons {
+    display: flex;
+    gap: 4px;
     flex-shrink: 0;
   }
 
-  .member-checkbox input[type="checkbox"] {
-    width: 20px;
-    height: 20px;
+  .view-btn {
+    border: 1.5px solid var(--border);
+    background: var(--white);
+    color: var(--text-light);
+    padding: 0.2rem 0.5rem;
+    border-radius: 5px;
+    font-size: 0.7rem;
     cursor: pointer;
-    accent-color: var(--accent);
+    transition: all 0.15s;
+    white-space: nowrap;
+    font-weight: 500;
+  }
+
+  .view-btn:hover {
+    border-color: var(--primary-light);
+    color: var(--primary);
+  }
+
+  .view-btn.active-realtime {
+    background: #2980b9;
+    color: var(--white);
+    border-color: #2980b9;
+  }
+
+  .view-btn.active-youtube {
+    background: #c0392b;
+    color: var(--white);
+    border-color: #c0392b;
+  }
+
+  .view-btn.active-both {
+    background: #27ae60;
+    color: var(--white);
+    border-color: #27ae60;
   }
 
   .member-info {
@@ -428,8 +467,17 @@
     .member-timestamp {
       width: 100%;
       text-align: left;
-      padding-left: 26px;
+      padding-left: 0;
       min-width: unset;
+    }
+
+    .view-buttons {
+      order: -1;
+    }
+
+    .view-btn {
+      padding: 0.15rem 0.4rem;
+      font-size: 0.65rem;
     }
 
     .dept-header {
@@ -486,6 +534,12 @@
       <div class="progress-bar-inner" id="progressBar" style="width:0%"></div>
     </div>
     <div class="progress-percent" id="progressPercent">0%</div>
+    <div style="display:flex; gap:1rem; margin-top:0.6rem; font-size:0.8rem; flex-wrap:wrap;">
+      <span style="color:#2980b9;">&#9632; リアルタイム: <strong id="countRealtime">0</strong></span>
+      <span style="color:#c0392b;">&#9632; YouTube: <strong id="countYoutube">0</strong></span>
+      <span style="color:#27ae60;">&#9632; 両方: <strong id="countBoth">0</strong></span>
+      <span style="color:#7f8c8d;">&#9632; 未視聴: <strong id="countNone">0</strong></span>
+    </div>
   </div>
 </section>
 
@@ -497,7 +551,7 @@
 </main>
 
 <footer class="footer">
-  <div class="footer-note">当日参加 / YouTube閲覧</div>
+  <div class="footer-note">視聴方法: リアルタイム参加 / YouTube閲覧 / 両方</div>
   <div>&copy; オルテナジー 全体会視聴チェックリスト</div>
 </footer>
 
@@ -816,24 +870,23 @@ function subscribeToMonth(ym) {
   );
 }
 
-async function toggleCheck(name, checked) {
+async function setViewType(name, type) {
   const docRef = db.collection('viewing_checks').doc(currentMonth);
+  const current = checkData[name];
+  const currentType = current ? current.type : null;
 
   try {
     const updateData = {};
-    if (checked) {
+    if (currentType === type) {
+      // Toggle off if same button clicked
+      updateData[name] = { type: null, checked: false, timestamp: '' };
+    } else {
       updateData[name] = {
+        type: type,
         checked: true,
         timestamp: new Date().toISOString()
       };
-    } else {
-      updateData[name] = {
-        checked: false,
-        timestamp: ''
-      };
     }
-
-    // Use set with merge to create doc if it doesn't exist
     await docRef.set(updateData, { merge: true });
   } catch (error) {
     console.error('Error updating check:', error);
@@ -873,7 +926,7 @@ function renderOrg() {
     dept.groups.forEach(g => {
       g.members.forEach(m => {
         deptTotal++;
-        if (checkData[m.name] && checkData[m.name].checked) deptChecked++;
+        if (checkData[m.name] && checkData[m.name].type) deptChecked++;
       });
     });
 
@@ -913,19 +966,22 @@ function renderOrg() {
 
       // Members
       group.members.forEach(member => {
-        const isChecked = checkData[member.name] && checkData[member.name].checked;
-        const ts = checkData[member.name] && checkData[member.name].timestamp
-          ? checkData[member.name].timestamp : '';
+        const data = checkData[member.name];
+        const viewType = data ? data.type : null;
+        const ts = data && data.timestamp ? data.timestamp : '';
 
         const row = document.createElement('div');
-        row.className = 'member-row' + (isChecked ? ' checked' : '');
+        row.className = 'member-row' + (viewType ? ` checked-${viewType}` : '');
         row.dataset.name = member.name;
 
         row.innerHTML = `
-          <div class="member-checkbox">
-            <input type="checkbox" ${isChecked ? 'checked' : ''}
-              data-name="${member.name}"
-              title="${member.name}">
+          <div class="view-buttons">
+            <button class="view-btn ${viewType === 'realtime' ? 'active-realtime' : ''}"
+              data-name="${member.name}" data-type="realtime" title="リアルタイム視聴">Live</button>
+            <button class="view-btn ${viewType === 'youtube' ? 'active-youtube' : ''}"
+              data-name="${member.name}" data-type="youtube" title="YouTube視聴">YT</button>
+            <button class="view-btn ${viewType === 'both' ? 'active-both' : ''}"
+              data-name="${member.name}" data-type="both" title="両方">両方</button>
           </div>
           <div class="member-info">
             <span class="member-name">${member.name}</span>
@@ -935,9 +991,10 @@ function renderOrg() {
           <div class="member-timestamp">${formatTimestamp(ts)}</div>
         `;
 
-        const cb = row.querySelector('input[type="checkbox"]');
-        cb.addEventListener('change', (e) => {
-          toggleCheck(member.name, e.target.checked);
+        row.querySelectorAll('.view-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            setViewType(btn.dataset.name, btn.dataset.type);
+          });
         });
 
         section.appendChild(row);
@@ -954,13 +1011,24 @@ function renderOrg() {
 function updateProgress() {
   let total = allMembers.length;
   let checked = 0;
+  let cRealtime = 0, cYoutube = 0, cBoth = 0;
 
   allMembers.forEach(name => {
-    if (checkData[name] && checkData[name].checked) checked++;
+    const d = checkData[name];
+    if (d && d.type) {
+      checked++;
+      if (d.type === 'realtime') cRealtime++;
+      else if (d.type === 'youtube') cYoutube++;
+      else if (d.type === 'both') cBoth++;
+    }
   });
 
   document.getElementById('checkedCount').textContent = checked;
   document.getElementById('totalCount').textContent = total;
+  document.getElementById('countRealtime').textContent = cRealtime;
+  document.getElementById('countYoutube').textContent = cYoutube;
+  document.getElementById('countBoth').textContent = cBoth;
+  document.getElementById('countNone').textContent = total - checked;
 
   const pct = total > 0 ? Math.round((checked / total) * 100) : 0;
   document.getElementById('progressBar').style.width = pct + '%';
