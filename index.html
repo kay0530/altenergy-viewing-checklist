@@ -358,6 +358,34 @@
     flex-shrink: 0;
   }
 
+  .member-comment {
+    flex-shrink: 1;
+    min-width: 0;
+  }
+
+  .member-comment input {
+    width: 100%;
+    min-width: 80px;
+    max-width: 200px;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 0.2rem 0.5rem;
+    font-size: 0.75rem;
+    color: var(--text);
+    background: var(--white);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .member-comment input:focus {
+    border-color: var(--primary-light);
+    box-shadow: 0 0 0 2px rgba(41, 128, 185, 0.15);
+  }
+
+  .member-comment input::placeholder {
+    color: #bdc3c7;
+  }
+
   .member-timestamp {
     font-size: 0.75rem;
     color: var(--text-light);
@@ -462,6 +490,14 @@
 
     .member-info {
       flex-wrap: wrap;
+    }
+
+    .member-comment {
+      width: 100%;
+    }
+
+    .member-comment input {
+      max-width: 100%;
     }
 
     .member-timestamp {
@@ -870,6 +906,22 @@ function subscribeToMonth(ym) {
   );
 }
 
+function escapeHtml(str) {
+  return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+async function saveComment(name, comment) {
+  const docRef = db.collection('viewing_checks').doc(currentMonth);
+  try {
+    const current = checkData[name] || {};
+    const updateData = {};
+    updateData[name] = { ...current, comment: comment.trim() };
+    await docRef.set(updateData, { merge: true });
+  } catch (error) {
+    console.error('Error saving comment:', error);
+  }
+}
+
 async function setViewType(name, type) {
   const docRef = db.collection('viewing_checks').doc(currentMonth);
   const current = checkData[name];
@@ -913,6 +965,15 @@ function setStatus(online) {
 // Render
 // ============================================================
 function renderOrg() {
+  // Preserve focused comment input during re-render
+  const activeEl = document.activeElement;
+  let focusedName = null;
+  let cursorPos = null;
+  if (activeEl && activeEl.closest('.member-comment')) {
+    focusedName = activeEl.dataset.name;
+    cursorPos = activeEl.selectionStart;
+  }
+
   const container = document.getElementById('orgContainer');
   container.innerHTML = '';
 
@@ -969,6 +1030,7 @@ function renderOrg() {
         const data = checkData[member.name];
         const viewType = data ? data.type : null;
         const ts = data && data.timestamp ? data.timestamp : '';
+        const comment = data && data.comment ? data.comment : '';
 
         const row = document.createElement('div');
         row.className = 'member-row' + (viewType ? ` checked-${viewType}` : '');
@@ -988,6 +1050,10 @@ function renderOrg() {
             <span class="member-position">${member.position}</span>
             ${member.note ? `<span class="member-note">${member.note}</span>` : ''}
           </div>
+          <div class="member-comment">
+            <input type="text" placeholder="コメント（視聴予定等）"
+              data-name="${member.name}" value="${escapeHtml(comment)}">
+          </div>
           <div class="member-timestamp">${formatTimestamp(ts)}</div>
         `;
 
@@ -995,6 +1061,19 @@ function renderOrg() {
           btn.addEventListener('click', () => {
             setViewType(btn.dataset.name, btn.dataset.type);
           });
+        });
+
+        const commentInput = row.querySelector('.member-comment input');
+        let commentTimer = null;
+        commentInput.addEventListener('input', () => {
+          clearTimeout(commentTimer);
+          commentTimer = setTimeout(() => {
+            saveComment(member.name, commentInput.value);
+          }, 600);
+        });
+        commentInput.addEventListener('blur', () => {
+          clearTimeout(commentTimer);
+          saveComment(member.name, commentInput.value);
         });
 
         section.appendChild(row);
@@ -1006,6 +1085,15 @@ function renderOrg() {
     card.appendChild(body);
     container.appendChild(card);
   });
+
+  // Restore focus to comment input after re-render
+  if (focusedName) {
+    const input = container.querySelector(`.member-comment input[data-name="${focusedName}"]`);
+    if (input) {
+      input.focus();
+      if (cursorPos !== null) input.setSelectionRange(cursorPos, cursorPos);
+    }
+  }
 }
 
 function updateProgress() {
